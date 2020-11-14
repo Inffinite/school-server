@@ -3,8 +3,16 @@ const router = new express.Router()
 const Connection = require('../db/mysql')
 const axios = require('axios')
 const auth = require('../middleware/auth')
-const jwt = require('jsonwebtoken')
-const { createUser, confirmToken, generateAuthToken, fetchUserDetails, stalker, addContacts } = require('../models/UserModel')
+const { 
+  createUser, 
+  confirmToken, 
+  generateAuthToken, 
+  fetchUserDetails, 
+  stalker, 
+  addContacts, 
+  addCourse, 
+  addAdmission 
+} = require('../models/UserModel')
 
 router.get('/hello', async (req, res) => {
   // var email = 'louislaizr4@gmail.com'
@@ -53,6 +61,37 @@ router.post('/addContacts', auth, async (req, res) => {
     res.status(200).send()
   } catch (error) {
     console.log(error)
+    res.status(400).send()
+  }
+})
+
+router.post('/addCourse', auth, async (req, res) => {
+  try {
+    await addCourse(req.user.id, req.query.course_name)
+    res.status(200).send()
+  } catch (error) {
+    res.status(400).send()
+  }
+})
+
+router.post('/addAdmission', auth, async (req, res) => {
+  try {
+    await addAdmission(req.user.id, req.query.admission, req.query.initials, ((status) => {
+      switch (status) {
+        case true:
+          return res.status(200).send()
+          break;
+
+        case false:
+          return res.status(400).send({ error: 'Admission is already in use' })
+          break;
+          
+        default:
+          break;
+      }
+    }))
+    
+  } catch (error) {
     res.status(400).send()
   }
 })

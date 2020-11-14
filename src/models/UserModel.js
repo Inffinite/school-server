@@ -49,6 +49,86 @@ fetchUserDetails = async (email, callback) => {
   })
 }
 
+addAdmission = async (id, admission, initials, callback) => {
+  Connection.query(`SELECT * FROM admission_numbers WHERE 
+  admission_number = ${admission} AND
+  admission_initial = '${initials}' AND
+  user_id != ${id}`, (error, results, fields) => {
+    if (error) throw error;
+
+    if(results.length != 0){
+      return callback(false)
+    }
+  })
+
+  Connection.query(`SELECT * FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
+    if (error) throw error;
+    
+    switch (results.length) {
+      case 0:
+        // if users admission does not exist add one
+        Connection.query(`
+        INSERT INTO admission_numbers (
+          user_id, 
+         admission_number,
+         admission_initial) 
+          VALUES (
+            ${id},
+            ${admission},
+            '${initials}'
+          )`, (error, results, fields) => {
+          if (error) throw error;
+          return callback(true);
+        })
+        break;
+    
+      default:
+        // if users course exists, update it
+        Connection.query(`UPDATE admission_numbers SET 
+        user_id = ${id}, 
+        admission_number = ${admission},
+        admission_initial = '${initials}' WHERE user_id = ${id}`, (error, results, fields) => {
+          if (error) throw error;
+          return callback(true);  
+        })
+        break;
+    }
+  })
+}
+
+addCourse = async (id, course_name) => {
+  Connection.query(`SELECT * FROM course WHERE user_id = ${id}`, (error, results, fields) => {
+    if (error) throw error;
+    
+    switch (results.length) {
+      case 0:
+        // if users course does not exist add one
+        Connection.query(`
+        INSERT INTO course (
+          user_id, 
+          course_name) 
+          VALUES (
+            ${id},
+            '${course_name}'
+          )`, (error, results, fields) => {
+          if (error) throw error;
+          return;
+        })
+        break;
+    
+      default:
+        // if users course exists, update it
+        Connection.query(`UPDATE course SET 
+        user_id = ${id}, 
+        course_name = '${course_name}' WHERE user_id = ${id}`, (error, results, fields) => {
+          if (error) throw error;
+          return;
+        })
+        break;
+    }
+  })
+}
+
 addContacts = async (id, phone, ig_link) => {
   Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
     if (error) throw error;
@@ -122,5 +202,7 @@ module.exports = {
   fetchUserId,
   stalker,
   confirmToken,
-  addContacts
+  addContacts,
+  addCourse,
+  addAdmission
 }
