@@ -55,7 +55,7 @@ addContacts = async (id, phone, ig_link) => {
     console.log(results.length)
     switch (results.length) {
       case 0:
-        // if no contacts exist add new ones
+        // if no contacts exist add a new one
         Connection.query(`
         INSERT INTO contacts (
           user_id, 
@@ -72,6 +72,8 @@ addContacts = async (id, phone, ig_link) => {
         break;
     
       default:
+        // if contact exists update it with the parameters
+
         Connection.query(`UPDATE contacts SET 
         user_id = ${id}, 
         phone = '${phone}', 
