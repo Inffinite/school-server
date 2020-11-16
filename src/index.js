@@ -9,6 +9,7 @@ const port = 3000
 require('./db/mysql')
 
 const UserRouter = require('./routers/User')
+const SuggestionRouter = require('./routers/Suggestions')
 
 
 app.use(function (req, res, next) {
@@ -18,6 +19,7 @@ app.use(function (req, res, next) {
 })
 
 app.use(UserRouter)
+app.use(SuggestionRouter)
 
 const server = app.listen(port, () => {
     console.log(chalk.yellow('[+] The server is up on port ' + port))

@@ -174,7 +174,7 @@ fetchUserId = async (email, callback) => {
   })
 }
 
-// check whether the used token is legit
+// check whether the used google id token is legit
 confirmToken = async (token, callback) => {
   const client = new OAuth2Client(process.env.CLIENT_ID)
 
