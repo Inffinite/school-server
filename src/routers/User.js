@@ -11,6 +11,7 @@ const {
   stalker, 
   addContacts, 
   addCourse, 
+  users,
   addAdmission 
 } = require('../models/UserModel')
 
@@ -93,6 +94,16 @@ router.post('/addAdmission', auth, async (req, res) => {
     
   } catch (error) {
     res.status(400).send()
+  }
+})
+
+router.get('/users', auth, async (req, res) => {
+  try {
+    await users((results) => {
+      res.status(200).send(results)
+    })
+  } catch (error) {
+    req.status(400).send()
   }
 })
 

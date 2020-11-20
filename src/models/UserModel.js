@@ -129,6 +129,13 @@ addCourse = async (id, course_name) => {
   })
 }
 
+users = async (callback) => {
+  Connection.query(`SELECT * FROM users`, (error, results, fields) => {
+    if (error) throw error;
+      return callback(results);
+    })
+}
+
 addContacts = async (id, phone, ig_link) => {
   Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
     if (error) throw error;
@@ -204,5 +211,6 @@ module.exports = {
   confirmToken,
   addContacts,
   addCourse,
-  addAdmission
+  addAdmission,
+  users
 }
