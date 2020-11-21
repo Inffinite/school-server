@@ -1,36 +1,33 @@
 const Connection = require('../db/mysql')
 
-addSuggestion = async (id, title, message) => {
-    Connection.query(`INSERT INTO suggestions 
-    (user_id, title, message) VALUES 
+addMessage = async (id, title, message, type) => {
+    Connection.query(`INSERT INTO messages
+    (user_id, title, message, type) VALUES 
     (
         ${id}, 
         '${title}',
-        '${message}'
+        '${message}',
+        ${type}
     )`, (error, results, fields) => {
         if (error) throw error;
         return;
     })
 }
 
-addAnnouncement = async (id, title, message) => {
-    Connection.query(`INSERT INTO announcements
-    (user_id, title, message) VALUES 
-    (
-        ${id}, 
-        '${title}',
-        '${message}'
-    )`, (error, results, fields) => {
-        if (error) throw error;
-        return;
-    })
-}
-
-getSuggestions = async (userid, callback) => {
-    // if userid is provided fetch suggestions from that id
+getMessages = async (userid, callback) => {
+    // if userid is provided fetch messages from that id
 
     if (userid == null) {
-        Connection.query(`SELECT * FROM suggestions`, (error, results, fields) => {
+        Connection.query(`SELECT 
+        users.fname, 
+        users.profile_pic_url, 
+        users.email, 
+        messages.title, 
+        messages.message, 
+        messages.type,
+        messages.created_at, 
+        messages.id FROM messages
+        INNER JOIN users ON messages.user_id=users.id;`, (error, results, fields) => {
             if (error) {
                 console.log(error)
                 return callback(false)
@@ -38,10 +35,30 @@ getSuggestions = async (userid, callback) => {
             if (results.length == 0) {
                 return callback(false)
             }
+
+            for (let i = 0; i < results.length; i++) {
+                switch (results[i].type) {
+                    case 1:
+                        results[i].type = 'suggestion'
+                        break;
+
+                    case 2:
+                        results[i].type = 'announcement'
+                        break;
+
+                    case 3:
+                        results[i].type = 'report'
+                        break;
+                
+                    default:
+                        break;
+                }
+            }
+
             return callback(results);
         })
     } else{
-        Connection.query(`SELECT * FROM suggestions WHERE user_id = ${userid}`, (error, results, fields) => {
+        Connection.query(`SELECT * FROM messages WHERE user_id = ${userid}`, (error, results, fields) => {
             if (error) {
                 console.log(error)
                 return callback(false)
@@ -54,69 +71,23 @@ getSuggestions = async (userid, callback) => {
     }
 }
 
-getAnnouncements = async (userid, callback) => {
-    // if userid is provided fetch announcements from that id
-
-    if (userid == null) {
-        Connection.query(`SELECT * FROM announcements`, (error, results, fields) => {
-            if (error) {
-                console.log(error)
-                return callback(false)
-            };
-            if (results.length == 0) {
-                return callback(false)
-            }
-            return callback(results);
-        })
-    } else{
-        Connection.query(`SELECT * FROM announcements WHERE user_id = ${userid}`, (error, results, fields) => {
-            if (error) {
-                console.log(error)
-                return callback(false)
-            };
-            if (results.length == 0) {
-                return callback(false)
-            }
-            return callback(results);
-        })
-    }
-}
-
-deleteSuggestion = async (id) => {
-    Connection.query(`DELETE FROM suggestions WHERE id = ${id}`, (error, results, fields) => {
+deleteMessage = async (id) => {
+    Connection.query(`DELETE FROM messages WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return;
     })
 }
 
-deleteAnnouncement = async (id) => {
-    Connection.query(`DELETE FROM announcements WHERE id = ${id}`, (error, results, fields) => {
-        if (error) throw error;
-        return;
-    })
-}
-
-deleteUserSuggestions = async (id) => {
-    Connection.query(`DELETE FROM suggestions WHERE user_id = ${id}`, (error, results, fields) => {
-        if (error) throw error;
-        return;
-    })
-}
-
-deleteUserAnnouncements = async (id) => {
-    Connection.query(`DELETE FROM announcements WHERE user_id = ${id}`, (error, results, fields) => {
+deleteUserMessage = async (id) => {
+    Connection.query(`DELETE FROM messages WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return;
     })
 }
 
 module.exports = {
-    addSuggestion,
-    getSuggestions,
-    deleteSuggestion,
-    deleteUserSuggestions,
-    addAnnouncement,
-    getAnnouncements,
-    deleteAnnouncement,
-    deleteUserAnnouncements
+    getMessages,
+    deleteMessage,
+    deleteUserMessage,
+    addMessage
 }

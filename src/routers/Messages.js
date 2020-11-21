@@ -1,6 +1,7 @@
 const express = require('express')
 const router = new express.Router()
 const auth = require('../middleware/auth')
+const moment = require('moment')
 const { 
     addSuggestion, 
     getSuggestions, 
@@ -9,7 +10,11 @@ const {
     deleteAnnouncement,
     addAnnouncement,
     getAnnouncements,
-    deleteUserAnnouncements
+    deleteUserAnnouncements,
+    addMessage,
+    getMessages,
+    deleteMessage,
+    deleteUserMessage
 } = require('../models/MessagesModel')
 
 router.post('/suggest', auth, async (req, res) => {
@@ -22,9 +27,9 @@ router.post('/suggest', auth, async (req, res) => {
     }
 })
 
-router.post('/announce', auth, async (req, res) => {
+router.post('/message', auth, async (req, res) => {
     try {
-        await addAnnouncement(req.user.id, req.query.title, req.query.message)
+        await addMessage(req.user.id, req.query.title, req.query.message, req.query.type)
         res.status(200).send()
     } catch (error) {
         console.log(error)
@@ -32,84 +37,49 @@ router.post('/announce', auth, async (req, res) => {
     }
 })
 
-// delete a suggestion by its id
-router.delete('/deleteSuggestion', auth, async (req, res) => {
+router.delete('/deleteMessage', auth, async (req, res) => {
     try {
-        await deleteSuggestion(req.query.id)
+        await deleteMessage(req.query.id)
         res.status(200).send()
     } catch (error) {
         res.status(400).send()
     }
 })
 
-router.delete('/deleteAnnouncement', auth, async (req, res) => {
+// delete all messages from a specific user
+router.delete('/deleteUserMessage', auth, async (req, res) => {
     try {
-        await deleteAnnouncement(req.query.id)
+        await deleteUserMessage(req.query.id)
         res.status(200).send()
     } catch (error) {
         res.status(400).send()
     }
 })
 
-// delete all suggestions from a specific user
-router.delete('/deleteUserSuggestions', auth, async (req, res) => {
-    try {
-        await deleteUserSuggestions(req.query.id)
-        res.status(200).send()
-    } catch (error) {
-        res.status(400).send()
-    }
-})
+router.get('/getMessages', auth, async (req, res) => {
 
-router.delete('/deleteUserAnnouncements', auth, async (req, res) => {
-    try {
-        await deleteUserAnnouncements(req.query.id)
-        res.status(200).send()
-    } catch (error) {
-        res.status(400).send()
-    }
-})
-
-router.get('/getSuggestions', auth, async (req, res) => {
+    // if an id is provided fetch the messages it owns
     try {
         if(req.query.id) {
-            await getSuggestions(req.query.id, ((results) => {
+            await getMessages(req.query.id, ((results) => {
                 if (results == false){
                     return res.status(400).send()
                 } else {
+                    for(i = 0; i < results.length; i++){
+                        results[i].created_at = moment(results[i].created_at, "YYYYMMDD").fromNow()
+                    }
                     return res.status(200).send(results)
                 }
             }))
         } else{
-            await getSuggestions(null, ((results) => {
+            await getMessages(null, ((results) => {
                 if (results == false){
                     return res.status(400).send()
                 } else {
-                    return res.status(200).send(results)
-                }
-            }))
-        }
-    } catch (error) {
-        console.log(error)
-        res.status(400).send()
-    }
-})
+                    for(i = 0; i < results.length; i++){
+                        results[i].created_at = moment(results[i].created_at, "YYYYMMDD").fromNow()
+                    }
 
-router.get('/getAnnouncements', auth, async (req, res) => {
-    try {
-        if(req.query.id) {
-            await getAnnouncements(req.query.id, ((results) => {
-                if (results == false){
-                    return res.status(400).send()
-                } else {
-                    return res.status(200).send(results)
-                }
-            }))
-        } else{
-            await getAnnouncements(null, ((results) => {
-                if (results == false){
-                    return res.status(400).send()
-                } else {
                     return res.status(200).send(results)
                 }
             }))

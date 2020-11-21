@@ -12,7 +12,8 @@ const {
   addContacts, 
   addCourse, 
   users,
-  addAdmission 
+  addAdmission, 
+  fetchUserDetailsById
 } = require('../models/UserModel')
 
 router.get('/hello', async (req, res) => {
@@ -21,13 +22,26 @@ router.get('/hello', async (req, res) => {
   //   if (error) throw error;
   //   console.log(results.length)
   // })
-  generateAuthToken(3, ((token) => {
-    console.log(token)
-  }))
+  // generateAuthToken(3, ((token) => {
+  //   console.log(token)
+  // }))
+
+  res.status(200).send({ message: "fuck you" })
 })
 
 router.get('/userDetails', auth, async (req, res) => {
   fetchUserDetails(req.user.email, ((results) => {
+    res.status(200).send(results)
+  }))
+})
+
+router.get('/me', auth, async (req, res) => {
+  res.status(200).send(req.user)
+})
+
+
+router.get('/userDetailsId', auth, async (req, res) => {
+  fetchUserDetailsById(req.user.id, ((results) => {
     res.status(200).send(results)
   }))
 })
@@ -102,6 +116,16 @@ router.get('/users', auth, async (req, res) => {
     await users((results) => {
       res.status(200).send(results)
     })
+  } catch (error) {
+    req.status(400).send()
+  }
+})
+
+router.get('/stalkers', auth, async (req, res) => {
+  try {
+    stalkers(req.user.id, ((results) => {
+      res.status(200).send(results)
+    }))
   } catch (error) {
     req.status(400).send()
   }

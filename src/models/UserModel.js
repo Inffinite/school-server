@@ -49,6 +49,13 @@ fetchUserDetails = async (email, callback) => {
   })
 }
 
+fetchUserDetailsById = async (id, callback) => {
+  Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
+    if (error) throw error;
+    return callback(results[0])
+  })
+}
+
 addAdmission = async (id, admission, initials, callback) => {
   Connection.query(`SELECT * FROM admission_numbers WHERE 
   admission_number = ${admission} AND
@@ -136,6 +143,13 @@ users = async (callback) => {
     })
 }
 
+stalkers = async (id, callback) => {
+  Connection.query(`SELECT * FROM stalkers WHERE user_id = ${id}`, (error, results, fields) => {
+    if (error) throw error;
+      return callback(results);
+    })
+}
+
 addContacts = async (id, phone, ig_link) => {
   Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
     if (error) throw error;
@@ -212,5 +226,7 @@ module.exports = {
   addContacts,
   addCourse,
   addAdmission,
-  users
+  users,
+  stalkers,
+  fetchUserDetailsById
 }

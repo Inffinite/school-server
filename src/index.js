@@ -10,6 +10,7 @@ require('./db/mysql')
 
 const UserRouter = require('./routers/User')
 const MessagesRouter = require('./routers/Messages')
+const EventsRouter = require('./routers/Events')
 
 
 app.use(function (req, res, next) {
@@ -20,6 +21,7 @@ app.use(function (req, res, next) {
 
 app.use(UserRouter)
 app.use(MessagesRouter)
+app.use(EventsRouter)
 
 const server = app.listen(port, () => {
     console.log(chalk.yellow('[+] The server is up on port ' + port))
