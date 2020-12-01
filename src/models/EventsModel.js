@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const Connection = require('../db/mysql')
 const { OAuth2Client } = require('google-auth-library')
 
-newEvent = async (id, date, title, message) => {
+newEvent = async(id, date, title, message) => {
     Connection.query(`INSERT INTO events 
     (user_id, 
     event_date,
@@ -14,6 +14,22 @@ newEvent = async (id, date, title, message) => {
     })
 }
 
+getEvents = async(callback) => {
+    Connection.query(`SELECT * FROM events`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
+deleteEvent = async(id) => {
+    Connection.query(`DELETE FROM events WHERE id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return;
+    })
+}
+
 module.exports = {
-    newEvent
+    newEvent,
+    getEvents,
+    deleteEvent
 }

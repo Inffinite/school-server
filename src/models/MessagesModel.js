@@ -4,7 +4,7 @@ addMessage = async (id, title, message, type) => {
     Connection.query(`INSERT INTO messages
     (user_id, title, message, type) VALUES 
     (
-        ${id}, 
+        ${id},
         '${title}',
         '${message}',
         ${type}
