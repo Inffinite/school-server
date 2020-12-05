@@ -28,8 +28,16 @@ deleteEvent = async(id) => {
     })
 }
 
+deleteEvents = async(id) => {
+    Connection.query(`DELETE FROM events`, (error, results, fields) => {
+        if (error) throw error;
+        return;
+    })
+}
+
 module.exports = {
     newEvent,
     getEvents,
-    deleteEvent
+    deleteEvent,
+    deleteEvents
 }
