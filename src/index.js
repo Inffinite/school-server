@@ -14,19 +14,13 @@ const UserRouter = require('./routers/User')
 const MessagesRouter = require('./routers/Messages')
 const EventsRouter = require('./routers/Events')
 const WhatsappRouter = require('./routers/Whatsapp')
-    // const fs = require('fs')
-
-
-// app.use(function (req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*")
-//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-//     next()
-// })
+const FaqRouter = require('./routers/Faq')
 
 app.use(UserRouter)
 app.use(MessagesRouter)
 app.use(EventsRouter)
 app.use(WhatsappRouter)
+app.use(FaqRouter)
 
 const server = app.listen(port, () => {
     console.log(chalk.yellow('[+] The server is up on port ' + port))

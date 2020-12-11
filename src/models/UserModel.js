@@ -2,31 +2,29 @@ const jwt = require('jsonwebtoken')
 const Connection = require('../db/mysql')
 const { OAuth2Client } = require('google-auth-library')
 
-generateAuthToken = async (userid, callback) => {
-  console.log('token id ' + userid)
+generateAuthToken = async(userid, callback) => {
+    let token = jwt.sign({ id: userid }, process.env.JWT_SECRET)
 
-  let token = jwt.sign({ id: userid }, process.env.JWT_SECRET)
-
-  Connection.query(`INSERT INTO tokens (user_id, token) VALUES (${userid}, '${token}')`, (error, results, fields) => {
-    if (error) throw error;
-    callback(token)
-  })
-}
-
-stalker = async (userid, victimid, callback) => {
-  Connection.query(`INSERT INTO stalkers (user_id, stalker_id) VALUES (${victimid}, ${userid})`, (error, results, fields) => {
-    if (error) throw error;
-    
-    Connection.query(`UPDATE users SET stalkers_count = stalkers_count + 1 WHERE id = ${victimid}`, (error, results, fields) => {
-      if (error) throw error;
-      return callback();
+    Connection.query(`INSERT INTO tokens (user_id, token) VALUES (${userid}, '${token}')`, (error, results, fields) => {
+        if (error) throw error;
+        callback(token)
     })
-
-  })
 }
 
-createUser = async (fname, lname, email, profile_pic_url, callback) => {
-  Connection.query(`
+stalker = async(userid, victimid, callback) => {
+    Connection.query(`INSERT INTO stalkers (user_id, stalker_id) VALUES (${victimid}, ${userid})`, (error, results, fields) => {
+        if (error) throw error;
+
+        Connection.query(`UPDATE users SET stalkers_count = stalkers_count + 1 WHERE id = ${victimid}`, (error, results, fields) => {
+            if (error) throw error;
+            return callback();
+        })
+
+    })
+}
+
+createUser = async(fname, lname, email, profile_pic_url, callback) => {
+    Connection.query(`
     INSERT INTO users (fname, lname, email, profile_pic_url) 
     VALUES (
       '${fname}',
@@ -34,47 +32,47 @@ createUser = async (fname, lname, email, profile_pic_url, callback) => {
       '${email}',
       '${profile_pic_url}'
     )`, (error, results, fields) => {
-    if (error) {
-      console.log(error)
-      return callback(false);
-    }
-    return callback(true);
-  })
+        if (error) {
+            console.log(error)
+            return callback(false);
+        }
+        return callback(true);
+    })
 }
 
-fetchUserDetails = async (email, callback) => {
-  Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
-    if (error) throw error;
-    return callback(results[0])
-  })
+fetchUserDetails = async(email, callback) => {
+    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results[0])
+    })
 }
 
-fetchUserDetailsById = async (id, callback) => {
-  Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
-    if (error) throw error;
-    return callback(results[0])
-  })
+fetchUserDetailsById = async(id, callback) => {
+    Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results[0])
+    })
 }
 
-addAdmission = async (id, admission, initials, callback) => {
-  Connection.query(`SELECT * FROM admission_numbers WHERE 
+addAdmission = async(id, admission, initials, callback) => {
+    Connection.query(`SELECT * FROM admission_numbers WHERE 
   admission_number = ${admission} AND
   admission_initial = '${initials}' AND
   user_id != ${id}`, (error, results, fields) => {
-    if (error) throw error;
+        if (error) throw error;
 
-    if(results.length != 0){
-      return callback(false)
-    }
-  })
+        if (results.length != 0) {
+            return callback(false)
+        }
+    })
 
-  Connection.query(`SELECT * FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
-    if (error) throw error;
-    
-    switch (results.length) {
-      case 0:
-        // if users admission does not exist add one
-        Connection.query(`
+    Connection.query(`SELECT * FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+
+        switch (results.length) {
+            case 0:
+                // if users admission does not exist add one
+                Connection.query(`
         INSERT INTO admission_numbers (
           user_id, 
          admission_number,
@@ -84,33 +82,33 @@ addAdmission = async (id, admission, initials, callback) => {
             ${admission},
             '${initials}'
           )`, (error, results, fields) => {
-          if (error) throw error;
-          return callback(true);
-        })
-        break;
-    
-      default:
-        // if users course exists, update it
-        Connection.query(`UPDATE admission_numbers SET 
+                    if (error) throw error;
+                    return callback(true);
+                })
+                break;
+
+            default:
+                // if users course exists, update it
+                Connection.query(`UPDATE admission_numbers SET 
         user_id = ${id}, 
         admission_number = ${admission},
         admission_initial = '${initials}' WHERE user_id = ${id}`, (error, results, fields) => {
-          if (error) throw error;
-          return callback(true);  
-        })
-        break;
-    }
-  })
+                    if (error) throw error;
+                    return callback(true);
+                })
+                break;
+        }
+    })
 }
 
-addCourse = async (id, course_name) => {
-  Connection.query(`SELECT * FROM course WHERE user_id = ${id}`, (error, results, fields) => {
-    if (error) throw error;
-    
-    switch (results.length) {
-      case 0:
-        // if users course does not exist add one
-        Connection.query(`
+addCourse = async(id, course_name) => {
+    Connection.query(`SELECT * FROM course WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+
+        switch (results.length) {
+            case 0:
+                // if users course does not exist add one
+                Connection.query(`
         INSERT INTO course (
           user_id, 
           course_name) 
@@ -118,46 +116,46 @@ addCourse = async (id, course_name) => {
             ${id},
             '${course_name}'
           )`, (error, results, fields) => {
-          if (error) throw error;
-          return;
-        })
-        break;
-    
-      default:
-        // if users course exists, update it
-        Connection.query(`UPDATE course SET 
+                    if (error) throw error;
+                    return;
+                })
+                break;
+
+            default:
+                // if users course exists, update it
+                Connection.query(`UPDATE course SET 
         user_id = ${id}, 
         course_name = '${course_name}' WHERE user_id = ${id}`, (error, results, fields) => {
-          if (error) throw error;
-          return;
-        })
-        break;
-    }
-  })
-}
-
-users = async (callback) => {
-  Connection.query(`SELECT * FROM users`, (error, results, fields) => {
-    if (error) throw error;
-      return callback(results);
+                    if (error) throw error;
+                    return;
+                })
+                break;
+        }
     })
 }
 
-stalkers = async (id, callback) => {
-  Connection.query(`SELECT * FROM stalkers WHERE user_id = ${id}`, (error, results, fields) => {
-    if (error) throw error;
-      return callback(results);
+users = async(callback) => {
+    Connection.query(`SELECT * FROM users`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
     })
 }
 
-addContacts = async (id, phone, ig_link) => {
-  Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
-    if (error) throw error;
-    console.log(results.length)
-    switch (results.length) {
-      case 0:
-        // if no contacts exist add a new one
-        Connection.query(`
+stalkers = async(id, callback) => {
+    Connection.query(`SELECT * FROM stalkers WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
+addContacts = async(id, phone, ig_link) => {
+    Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        console.log(results.length)
+        switch (results.length) {
+            case 0:
+                // if no contacts exist add a new one
+                Connection.query(`
         INSERT INTO contacts (
           user_id, 
           phone, 
@@ -167,66 +165,66 @@ addContacts = async (id, phone, ig_link) => {
             '${phone}',
             '${ig_link}'
           )`, (error, results, fields) => {
-          if (error) throw error;
-          return;
-        })
-        break;
-    
-      default:
-        // if contact exists update it with the parameters
+                    if (error) throw error;
+                    return;
+                })
+                break;
 
-        Connection.query(`UPDATE contacts SET 
+            default:
+                // if contact exists update it with the parameters
+
+                Connection.query(`UPDATE contacts SET 
         user_id = ${id}, 
         phone = '${phone}', 
         instagram_link = '${ig_link}' WHERE user_id = ${id}`, (error, results, fields) => {
-          if (error) throw error;
-          return;
-        })
+                    if (error) throw error;
+                    return;
+                })
 
-        break;
-    }
-  })
+                break;
+        }
+    })
 }
 
-fetchUserId = async (email, callback) => {
-  Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
-    if (error) throw error;
-    return callback(results[0].id)
-  })
+fetchUserId = async(email, callback) => {
+    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results[0].id)
+    })
 }
 
 // check whether the used google id token is legit
-confirmToken = async (token, callback) => {
-  const client = new OAuth2Client(process.env.CLIENT_ID)
+confirmToken = async(token, callback) => {
+    const client = new OAuth2Client(process.env.CLIENT_ID)
 
-  try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.CLIENT_ID
-    })
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.CLIENT_ID
+        })
 
-    const payload = ticket.getPayload()
-    const userid = payload['sub']
+        const payload = ticket.getPayload()
+        const userid = payload['sub']
 
-  } catch (error) {
-    callback(false)
-  }
+    } catch (error) {
+        callback(false)
+    }
 
-  console.log('Token confirmed')
-  return callback(true);
+    console.log('Token confirmed')
+    return callback(true);
 }
 
 module.exports = {
-  createUser,
-  generateAuthToken,
-  fetchUserDetails,
-  fetchUserId,
-  stalker,
-  confirmToken,
-  addContacts,
-  addCourse,
-  addAdmission,
-  users,
-  stalkers,
-  fetchUserDetailsById
+    createUser,
+    generateAuthToken,
+    fetchUserDetails,
+    fetchUserId,
+    stalker,
+    confirmToken,
+    addContacts,
+    addCourse,
+    addAdmission,
+    users,
+    stalkers,
+    fetchUserDetailsById
 }
