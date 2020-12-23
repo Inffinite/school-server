@@ -4,6 +4,7 @@ const Connection = require('../db/mysql')
 const auth = async(req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '')
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         Connection.query(`SELECT * FROM users WHERE id = ${decoded.id}`, (error, results, fields) => {
             if (error) {
@@ -11,7 +12,8 @@ const auth = async(req, res, next) => {
             };
 
             if (results.length == 0) {
-                throw new Error()
+                // throw error;
+                return res.status(401).send({ error: 'Authenticate' })
             }
 
             req.token = token

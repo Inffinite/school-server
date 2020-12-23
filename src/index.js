@@ -4,9 +4,7 @@ const cors = require('cors')
 const socket = require('socket.io')
 const app = express()
 const port = 3000
-    // const https = require('https')
 
-// require('./db/mongoose')
 require('./db/mysql')
 require('./socket/MessageSocket')
 

@@ -1,9 +1,12 @@
 const jwt = require('jsonwebtoken')
 const Connection = require('../db/mysql')
 const { OAuth2Client } = require('google-auth-library')
+const moment = require('moment')
 
 generateAuthToken = async(userid, callback) => {
-    let token = jwt.sign({ id: userid }, process.env.JWT_SECRET)
+    let token = jwt.sign({
+        id: userid
+    }, process.env.JWT_SECRET)
 
     Connection.query(`INSERT INTO tokens (user_id, token) VALUES (${userid}, '${token}')`, (error, results, fields) => {
         if (error) throw error;
@@ -23,20 +26,29 @@ stalker = async(userid, victimid, callback) => {
     })
 }
 
-createUser = async(fname, lname, email, profile_pic_url, callback) => {
+createUser = async(fname, lname, email, profile_pic_url, role, last_action, callback) => {
     Connection.query(`
-    INSERT INTO users (fname, lname, email, profile_pic_url) 
+    INSERT INTO users (fname, lname, email, profile_pic_url, role, last_action) 
     VALUES (
       '${fname}',
       '${lname}',
       '${email}',
-      '${profile_pic_url}'
+      '${profile_pic_url}',
+      '${role}',
+      '${last_action}'
     )`, (error, results, fields) => {
         if (error) {
             console.log(error)
             return callback(false);
         }
         return callback(true);
+    })
+}
+
+fetchUserId = async(email, callback) => {
+    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results[0].id)
     })
 }
 
@@ -73,15 +85,16 @@ addAdmission = async(id, admission, initials, callback) => {
             case 0:
                 // if users admission does not exist add one
                 Connection.query(`
-        INSERT INTO admission_numbers (
-          user_id, 
-         admission_number,
-         admission_initial) 
-          VALUES (
-            ${id},
-            ${admission},
-            '${initials}'
-          )`, (error, results, fields) => {
+                INSERT INTO admission_numbers (
+                user_id, 
+                admission_number,
+                admission_initial
+                ) 
+                VALUES (
+                    ${id},
+                    ${admission},
+                    '${initials}'
+                )`, (error, results, fields) => {
                     if (error) throw error;
                     return callback(true);
                 })
@@ -90,9 +103,9 @@ addAdmission = async(id, admission, initials, callback) => {
             default:
                 // if users course exists, update it
                 Connection.query(`UPDATE admission_numbers SET 
-        user_id = ${id}, 
-        admission_number = ${admission},
-        admission_initial = '${initials}' WHERE user_id = ${id}`, (error, results, fields) => {
+                user_id = ${id}, 
+                admission_number = ${admission},
+                admission_initial = '${initials}' WHERE user_id = ${id}`, (error, results, fields) => {
                     if (error) throw error;
                     return callback(true);
                 })
@@ -137,6 +150,12 @@ addCourse = async(id, course_name) => {
 users = async(callback) => {
     Connection.query(`SELECT * FROM users`, (error, results, fields) => {
         if (error) throw error;
+
+        var i;
+        for (i = 0; i < results.length; i++) {
+            results[i].last_action = moment(results[i].last_action, "DD/MM/YYYY").startOf('hour').fromNow()
+        }
+
         return callback(results);
     })
 }
@@ -186,10 +205,57 @@ addContacts = async(id, phone, ig_link) => {
     })
 }
 
-fetchUserId = async(email, callback) => {
-    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+editRole = (newRole, id) => {
+    Connection.query(`UPDATE users SET role='${newRole}' WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
-        return callback(results[0].id)
+        return
+    })
+}
+
+editAdmission = (admission, initial, id) => {
+    Connection.query(`UPDATE admission_numbers SET admission=${admission}, admission_initial='${initial}' WHERE id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return
+    })
+}
+
+editCourse = (course, id) => {
+    Connection.query(`UPDATE course SET course_name='${course}' WHERE id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return
+    })
+}
+
+editContacts = (phone, link, id) => {
+    Connection.query(`UPDATE contacts SET phone='${phone}', instagram_link='${link}' WHERE id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return
+    })
+}
+
+getContacts = (id, callback) => {
+    Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
+getAdmission = (id, callback) => {
+    Connection.query(`SELECT * FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
+checkDetails = (id, callback) => {
+    Connection.query(`SELECT COUNT(*) AS number FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+
+        if (results[0].number != 0) {
+            return callback(true);
+        } else {
+            return callback(false);
+        }
     })
 }
 
@@ -226,5 +292,12 @@ module.exports = {
     addAdmission,
     users,
     stalkers,
-    fetchUserDetailsById
+    fetchUserDetailsById,
+    getContacts,
+    getAdmission,
+    checkDetails,
+    editRole,
+    editAdmission,
+    editCourse,
+    editContacts
 }
