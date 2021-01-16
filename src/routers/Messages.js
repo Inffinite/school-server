@@ -7,7 +7,8 @@ const {
     addMessage,
     getMessages,
     deleteMessage,
-    deleteUserMessage
+    deleteUserMessage,
+    checkMessages
 } = require('../models/MessagesModel')
 
 router.post('/suggest', auth, async(req, res) => {
@@ -19,6 +20,19 @@ router.post('/suggest', auth, async(req, res) => {
         res.status(400).send()
     }
 })
+
+/// check for messages before fetching
+router.get('/checkMessages', auth, async(req, res) => {
+    try {
+        await checkMessages((messages) => {
+            res.status(200).send(messages)
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send()
+    }
+})
+
 
 router.post('/message', auth, async(req, res) => {
     try {

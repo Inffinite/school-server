@@ -212,6 +212,7 @@ router.post('/signin', async(req, res) => {
                             } else {
                                 fetchUserId(resp.data.email, ((id) => {
                                     generateAuthToken(id, ((token) => {
+                                        console.log('token' + token)
                                         return res.status(200).send({ token })
                                     }))
                                 }))

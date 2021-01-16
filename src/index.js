@@ -6,7 +6,6 @@ const app = express()
 const port = 3000
 
 require('./db/mysql')
-require('./socket/MessageSocket')
 
 const UserRouter = require('./routers/User')
 const MessagesRouter = require('./routers/Messages')
@@ -30,11 +29,19 @@ const server = app.listen(port, () => {
 //     passphrase: 'PMuchiri@123'
 // }, app).listen(3000)
 
-// io.on("connection", (socket) => {
-//     const data = '[+++] Hello from the server siiiiiiiide...'
-//     io.emit('Fuckery', data)
+let io = socket(server)
 
-// })
+io.set('origins', '*:*')
+
+io.on("connection", (socket) => {
+    const mydata = '[+++] Hello from the server siiiiiiiide...'
+    io.emit('Fuckery', mydata)
+
+    socket.on('message', (data) => {
+        console.log(data)
+        socket.emit('resp', data)
+    })
+})
 
 module.exports = {
     server

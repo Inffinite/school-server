@@ -14,6 +14,13 @@ addMessage = async (id, title, message, type) => {
     })
 }
 
+checkMessages = async (callback) => {
+    Connection.query(`SELECT COUNT(*) AS messages FROM messages`, (error, results, fields) => {
+        if (error) throw error;
+        callback(results)
+    })
+}
+
 getMessages = async (userid, callback) => {
     // if userid is provided fetch messages from that id
 
@@ -89,5 +96,6 @@ module.exports = {
     getMessages,
     deleteMessage,
     deleteUserMessage,
-    addMessage
+    addMessage,
+    checkMessages
 }

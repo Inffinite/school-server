@@ -153,7 +153,7 @@ users = async(callback) => {
 
         var i;
         for (i = 0; i < results.length; i++) {
-            results[i].last_action = moment(results[i].last_action, "DD/MM/YYYY").startOf('hour').fromNow()
+            results[i].last_action = moment(results[i].last_action, "DD/MM/YYYY").fromNow()
         }
 
         return callback(results);
