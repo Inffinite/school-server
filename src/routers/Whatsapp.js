@@ -5,7 +5,7 @@ const { addGroup, deleteGroup, getGroups } = require('../models/WhatsappModel')
 
 router.post('/addGroup', auth, async(req, res) => {
     try {
-        addGroup(req.query.name, req.query.description, req.query.link)
+        addGroup(req.user.id, req.query.name, req.query.description, req.query.link)
         res.status(200).send()
     } catch (error) {
         res.status(400).send()

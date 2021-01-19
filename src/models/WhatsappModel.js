@@ -1,7 +1,7 @@
 const Connection = require('../db/mysql')
 
-addGroup = (name, description, link) => {
-    Connection.query(`INSERT INTO whatsappGroups (name, description, link) VALUES ('${name}', '${description}', '${link}')`, (error, results, fields) => {
+addGroup = (user_id, name, description, link) => {
+    Connection.query(`INSERT INTO whatsappGroups (user_id, name, description, link) VALUES (${user_id},'${name}', '${description}', '${link}')`, (error, results, fields) => {
         if (error) throw error;
         return
     })
