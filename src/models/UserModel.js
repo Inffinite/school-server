@@ -2,8 +2,9 @@ const jwt = require('jsonwebtoken')
 const Connection = require('../db/mysql')
 const { OAuth2Client } = require('google-auth-library')
 const moment = require('moment')
+const { download } = require('../dp/dp')
 
-generateAuthToken = async(userid, callback) => {
+generateAuthToken = async (userid, callback) => {
     let token = jwt.sign({
         id: userid
     }, process.env.JWT_SECRET)
@@ -14,7 +15,7 @@ generateAuthToken = async(userid, callback) => {
     })
 }
 
-stalker = async(userid, victimid, callback) => {
+stalker = async (userid, victimid, callback) => {
     Connection.query(`INSERT INTO stalkers (user_id, stalker_id) VALUES (${victimid}, ${userid})`, (error, results, fields) => {
         if (error) throw error;
 
@@ -26,47 +27,55 @@ stalker = async(userid, victimid, callback) => {
     })
 }
 
-createUser = async(fname, lname, email, profile_pic_url, role, last_action, callback) => {
-    Connection.query(`
-    INSERT INTO users (fname, lname, email, profile_pic_url, role, last_action) 
-    VALUES (
-      '${fname}',
-      '${lname}',
-      '${email}',
-      '${profile_pic_url}',
-      '${role}',
-      '${last_action}'
-    )`, (error, results, fields) => {
-        if (error) {
-            console.log(error)
-            return callback(false);
-        }
-        return callback(true);
-    })
+createUser = async (fname, lname, email, profile_pic_url, role, last_action, callback) => {
+    
+    // download and save profile picture
+    // set its filename as its url
+    download(profile_pic_url, `${fname}${lname}.png`, function () {
+
+        Connection.query(`
+        INSERT INTO users (fname, lname, email, profile_pic_url, role, last_action) 
+        VALUES (
+        '${fname}',
+        '${lname}',
+        '${email}',
+        '${fname}${lname}',
+        '${role}',
+        '${last_action}'
+        )`, (error, results, fields) => {
+            if (error) {
+                console.log(error)
+                return callback(false);
+            }
+            return callback(true);
+        })
+
+    }
+    );
 }
 
-fetchUserId = async(email, callback) => {
+fetchUserId = async (email, callback) => {
     Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
         if (error) throw error;
         return callback(results[0].id)
     })
 }
 
-fetchUserDetails = async(email, callback) => {
+fetchUserDetails = async (email, callback) => {
     Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
         if (error) throw error;
         return callback(results[0])
     })
 }
 
-fetchUserDetailsById = async(id, callback) => {
+fetchUserDetailsById = async (id, callback) => {
     Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return callback(results[0])
     })
 }
 
-addAdmission = async(id, admission, initials, callback) => {
+addAdmission = async (id, admission, initials, callback) => {
     Connection.query(`SELECT * FROM admission_numbers WHERE 
   admission_number = ${admission} AND
   admission_initial = '${initials}' AND
@@ -114,7 +123,7 @@ addAdmission = async(id, admission, initials, callback) => {
     })
 }
 
-addCourse = async(id, course_name) => {
+addCourse = async (id, course_name) => {
     Connection.query(`SELECT * FROM course WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
 
@@ -147,7 +156,7 @@ addCourse = async(id, course_name) => {
     })
 }
 
-users = async(callback) => {
+users = async (callback) => {
     Connection.query(`SELECT * FROM users`, (error, results, fields) => {
         if (error) throw error;
 
@@ -160,14 +169,14 @@ users = async(callback) => {
     })
 }
 
-stalkers = async(id, callback) => {
+stalkers = async (id, callback) => {
     Connection.query(`SELECT * FROM stalkers WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return callback(results);
     })
 }
 
-addContacts = async(id, phone, ig_link) => {
+addContacts = async (id, phone, ig_link) => {
     Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         console.log(results.length)
@@ -260,7 +269,7 @@ checkDetails = (id, callback) => {
 }
 
 // check whether the used google id token is legit
-confirmToken = async(token, callback) => {
+confirmToken = async (token, callback) => {
     const client = new OAuth2Client(process.env.CLIENT_ID)
 
     try {

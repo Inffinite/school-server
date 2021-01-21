@@ -3,6 +3,7 @@ const router = new express.Router()
 const Connection = require('../db/mysql')
 const axios = require('axios')
 const auth = require('../middleware/auth')
+const { download } = require('../dp/dp')
 const {
     createUser,
     confirmToken,
@@ -22,11 +23,17 @@ const {
     editContacts,
     editRole
 } = require('../models/UserModel')
-const moment = require('moment')
+const moment = require('moment');
 
 
+router.get('/download', async (req, res) => {
+    download('https://www.google.com/images/srpr/logo3w.png', 'google.png', function () {
+        console.log('downloaded')
+        res.status(200).send()
+    });
+})
 
-router.get('/hello', async(req, res) => {
+router.get('/hello', async (req, res) => {
     // var email = 'louislaizr4@gmail.com'
     // Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
     //   if (error) throw error;
@@ -36,20 +43,20 @@ router.get('/hello', async(req, res) => {
     //   console.log(token)
     // }))
 
-    res.status(200).send({ message: "fuck you" })
+    res.status(200).send({ message: "f" })
 })
 
-router.get('/userDetails', auth, async(req, res) => {
+router.get('/userDetails', auth, async (req, res) => {
     fetchUserDetails(req.user.email, ((results) => {
         res.status(200).send(results)
     }))
 })
 
-router.get('/me', auth, async(req, res) => {
+router.get('/me', auth, async (req, res) => {
     res.status(200).send(req.user)
 })
 
-router.post('/editDetails', auth, async(req, res) => {
+router.post('/editDetails', auth, async (req, res) => {
     // phone course link admission role
     try {
         if (req.query.admission) {
@@ -74,13 +81,13 @@ router.post('/editDetails', auth, async(req, res) => {
     }
 })
 
-router.get('/userDetailsId', auth, async(req, res) => {
+router.get('/userDetailsId', auth, async (req, res) => {
     fetchUserDetailsById(req.user.id, ((results) => {
         res.status(200).send(results)
     }))
 })
 
-router.get('/stalkUser', auth, async(req, res) => {
+router.get('/stalkUser', auth, async (req, res) => {
     try {
 
         switch (req.user.email) {
@@ -104,7 +111,7 @@ router.get('/stalkUser', auth, async(req, res) => {
     }
 })
 
-router.post('/addContacts', auth, async(req, res) => {
+router.post('/addContacts', auth, async (req, res) => {
     try {
         await addContacts(req.user.id, req.query.phone, req.query.instagram_link)
         res.status(200).send()
@@ -114,13 +121,13 @@ router.post('/addContacts', auth, async(req, res) => {
     }
 })
 
-router.get('/getContacts', auth, async(req, res) => {
+router.get('/getContacts', auth, async (req, res) => {
     getContacts(req.query.id, ((results) => {
         res.status(200).send(results)
     }))
 })
 
-router.post('/addCourse', auth, async(req, res) => {
+router.post('/addCourse', auth, async (req, res) => {
     try {
         await addCourse(req.user.id, req.query.course_name)
         res.status(200).send()
@@ -129,7 +136,7 @@ router.post('/addCourse', auth, async(req, res) => {
     }
 })
 
-router.post('/addAdmission', auth, async(req, res) => {
+router.post('/addAdmission', auth, async (req, res) => {
     try {
         await addAdmission(req.user.id, req.query.admission, req.query.initials, ((status) => {
             switch (status) {
@@ -145,25 +152,24 @@ router.post('/addAdmission', auth, async(req, res) => {
                     break;
             }
         }))
-
     } catch (error) {
         res.status(400).send()
     }
 })
 
-router.get('/checkDetails', auth, async(req, res) => {
+router.get('/checkDetails', auth, async (req, res) => {
     checkDetails(req.user.id, ((results) => {
         res.status(200).send({ status: results })
     }))
 })
 
-router.get('/getAdmission', auth, async(req, res) => {
+router.get('/getAdmission', auth, async (req, res) => {
     getAdmission(req.query.id, ((results) => {
         res.status(200).send(results)
     }))
 })
 
-router.get('/users', auth, async(req, res) => {
+router.get('/users', auth, async (req, res) => {
     try {
         await users((results) => {
             res.status(200).send(results)
@@ -173,7 +179,7 @@ router.get('/users', auth, async(req, res) => {
     }
 })
 
-router.get('/stalkers', auth, async(req, res) => {
+router.get('/stalkers', auth, async (req, res) => {
     try {
         stalkers(req.user.id, ((results) => {
             res.status(200).send(results)
@@ -183,7 +189,7 @@ router.get('/stalkers', auth, async(req, res) => {
     }
 })
 
-router.post('/signin', async(req, res) => {
+router.post('/signin', async (req, res) => {
     confirmToken(req.query.token, ((status) => {
         switch (status) {
             case false:
@@ -197,7 +203,7 @@ router.post('/signin', async(req, res) => {
 
     axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${req.query.token}`)
         .then((resp) => {
-            Connection.query(`SELECT * FROM users WHERE email = '${resp.data.email}'`, async(error, results, fields) => {
+            Connection.query(`SELECT * FROM users WHERE email = '${resp.data.email}'`, async (error, results, fields) => {
                 if (error) {
                     res.status(400).send()
                     throw error;
