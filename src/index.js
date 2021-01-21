@@ -19,6 +19,9 @@ app.use(EventsRouter)
 app.use(WhatsappRouter)
 app.use(FaqRouter)
 
+// enables accessing profile pictures
+app.use('/profiles', express.static(__dirname + '/dp'))
+
 const server = app.listen(port, () => {
     console.log(chalk.yellow('[+] The server is up on port ' + port))
 })
