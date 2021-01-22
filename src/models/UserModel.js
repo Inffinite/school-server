@@ -156,6 +156,20 @@ addCourse = async (id, course_name) => {
     })
 }
 
+addBio = async (user_id, message) => {
+    Connection.query(`UPDATE bio SET message = '${message}' WHERE user_id = ${user_id}`, (error, results, fields) => {
+        if (error) throw error;
+        return;
+    })
+}
+
+getBio = async (user_id, callback) => {
+    Connection.query(`SELECT * FROM bio WHERE user_id = ${user_id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
 users = async (callback) => {
     Connection.query(`SELECT * FROM users`, (error, results, fields) => {
         if (error) throw error;
@@ -308,5 +322,7 @@ module.exports = {
     editRole,
     editAdmission,
     editCourse,
-    editContacts
+    editContacts,
+    addBio,
+    getBio
 }

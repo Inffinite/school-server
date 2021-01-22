@@ -21,7 +21,9 @@ const {
     editAdmission,
     editCourse,
     editContacts,
-    editRole
+    editRole,
+    addBio,
+    getBio
 } = require('../models/UserModel')
 const moment = require('moment');
 
@@ -54,6 +56,17 @@ router.get('/userDetails', auth, async (req, res) => {
 
 router.get('/me', auth, async (req, res) => {
     res.status(200).send(req.user)
+})
+
+router.post('/bio', auth, async (req, res) => {
+    addBio(req.user.id, req.query.message)
+    res.status(201).send()
+})
+
+router.get('/getBio', auth, async (req, res) => {
+    getBio(req.query.id, ((results) => {
+        res.status(200).send(results)
+    }))
 })
 
 router.post('/editDetails', auth, async (req, res) => {
