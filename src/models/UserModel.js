@@ -249,6 +249,13 @@ editCourse = (course, id) => {
     })
 }
 
+getCourse = (id, callback) => {
+    Connection.query(`SELECT * FROM course WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results)
+    })
+}
+
 editContacts = (phone, link, id) => {
     Connection.query(`UPDATE contacts SET phone='${phone}', instagram_link='${link}' WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
@@ -324,5 +331,6 @@ module.exports = {
     editCourse,
     editContacts,
     addBio,
-    getBio
+    getBio,
+    getCourse
 }

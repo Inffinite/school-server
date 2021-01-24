@@ -23,7 +23,8 @@ const {
     editContacts,
     editRole,
     addBio,
-    getBio
+    getBio,
+    getCourse
 } = require('../models/UserModel')
 const moment = require('moment');
 
@@ -144,6 +145,16 @@ router.post('/addCourse', auth, async (req, res) => {
     try {
         await addCourse(req.user.id, req.query.course_name)
         res.status(200).send()
+    } catch (error) {
+        res.status(400).send()
+    }
+})
+
+router.get('/getCourse', auth, async (req, res) => {
+    try {
+        await getCourse(req.query.id, ((course) => {
+            res.status(200).send(course)
+        }))  
     } catch (error) {
         res.status(400).send()
     }
