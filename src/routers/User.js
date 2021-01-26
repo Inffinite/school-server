@@ -50,7 +50,7 @@ router.get('/hello', async (req, res) => {
 })
 
 router.get('/userDetails', auth, async (req, res) => {
-    fetchUserDetails(req.user.email, ((results) => {
+    fetchUserDetails(req.query.id, ((results) => {
         res.status(200).send(results)
     }))
 })
@@ -103,17 +103,19 @@ router.get('/userDetailsId', auth, async (req, res) => {
 
 router.get('/stalkUser', auth, async (req, res) => {
     try {
-        console.log(req.user.id)
-        console.log(req.query.id)
         fetchUserDetails(req.query.id, ((results) => {
 
             // if victim id matches the stalker's id
             // send back the details
             // but dont add him to the stalkers list
 
+            var name = req.user.fname + ' ' + req.user.lname
+
             if(req.user.id == req.query.id){
-                console.log('match')
-                return res.status(200).send(results); 
+                stalker(req.user.id, results.id, name, (() => {
+                    res.status(200).send(results)
+                }))
+                // return res.status(200).send(results); 
             } else {
                 stalker(req.user.id, results.id, (() => {
                     res.status(200).send(results)
