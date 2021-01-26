@@ -15,8 +15,10 @@ generateAuthToken = async (userid, callback) => {
     })
 }
 
-stalker = async (userid, victimid, callback) => {
-    Connection.query(`INSERT INTO stalkers (user_id, stalker_id) VALUES (${victimid}, ${userid})`, (error, results, fields) => {
+stalker = async (userid, victimid, name, callback) => {
+    var time = moment().format();
+
+    Connection.query(`INSERT INTO stalkers (user_id, stalker_id, name, time) VALUES (${victimid}, ${userid}, '${name}', '${time}')`, (error, results, fields) => {
         if (error) throw error;
 
         Connection.query(`UPDATE users SET stalkers_count = stalkers_count + 1 WHERE id = ${victimid}`, (error, results, fields) => {
@@ -31,7 +33,7 @@ createUser = async (fname, lname, email, profile_pic_url, role, last_action, cal
 
     // download and save profile picture
     // set its filename as its url
-    download(profile_pic_url, `${fname}${lname}.png`, function () {
+    download(profile_pic_url, `${fname} ${lname}.png`, function () {
 
         Connection.query(`
         INSERT INTO users (fname, lname, email, profile_pic_url, role, last_action) 
@@ -39,7 +41,7 @@ createUser = async (fname, lname, email, profile_pic_url, role, last_action, cal
         '${fname}',
         '${lname}',
         '${email}',
-        '${fname}${lname}',
+        '${fname} ${lname}',
         '${role}',
         '${last_action}'
         )`, (error, results, fields) => {
@@ -191,6 +193,11 @@ users = async (callback) => {
 stalkers = async (id, callback) => {
     Connection.query(`SELECT * FROM stalkers WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
+
+        for (i = 0; i < results.length; i++) {
+            results[i].time = moment(results[i].time, "DD/MM/YYYY").fromNow()
+        }
+
         return callback(results);
     })
 }
