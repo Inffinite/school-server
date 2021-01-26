@@ -29,6 +29,13 @@ stalker = async (userid, victimid, name, callback) => {
     })
 }
 
+logout = async (id) => {
+    Connection.query(`DELETE FROM tokens WHERE user_id = ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        return;
+    })
+}
+
 createUser = async (fname, lname, email, profile_pic_url, role, last_action, callback) => {
 
     // download and save profile picture
@@ -344,5 +351,6 @@ module.exports = {
     editContacts,
     addBio,
     getBio,
-    getCourse
+    getCourse,
+    logout
 }

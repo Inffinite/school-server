@@ -24,16 +24,19 @@ const {
     editRole,
     addBio,
     getBio,
-    getCourse
+    getCourse,
+    logout
 } = require('../models/UserModel')
 const moment = require('moment');
 
 
-router.get('/download', async (req, res) => {
-    download('https://www.google.com/images/srpr/logo3w.png', 'google.png', function () {
-        console.log('downloaded')
-        res.status(200).send()
-    });
+router.get('/stuff', async (req, res) => {
+    // download('https://www.google.com/images/srpr/logo3w.png', 'google.png', function () {
+    //     console.log('downloaded')
+    //     res.status(200).send()
+    // });
+
+    console.log(req.query.stuff)
 })
 
 router.get('/hello', async (req, res) => {
@@ -207,6 +210,15 @@ router.get('/users', auth, async (req, res) => {
     }
 })
 
+router.get('/logout', auth, async (req, res) => {
+    try {
+        await logout(req.user.id)
+        res.status(200).send()
+    } catch (error) {
+        req.status(400).send()
+    }
+})
+
 router.get('/stalkers', auth, async (req, res) => {
     try {
         stalkers(req.user.id, ((results) => {
@@ -231,6 +243,7 @@ router.post('/signin', async (req, res) => {
 
     axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${req.query.token}`)
         .then((resp) => {
+            console.log(resp.data)
             Connection.query(`SELECT * FROM users WHERE email = '${resp.data.email}'`, async (error, results, fields) => {
                 if (error) {
                     res.status(400).send()
