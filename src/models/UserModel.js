@@ -28,7 +28,7 @@ stalker = async (userid, victimid, callback) => {
 }
 
 createUser = async (fname, lname, email, profile_pic_url, role, last_action, callback) => {
-    
+
     // download and save profile picture
     // set its filename as its url
     download(profile_pic_url, `${fname}${lname}.png`, function () {
@@ -61,8 +61,8 @@ fetchUserId = async (email, callback) => {
     })
 }
 
-fetchUserDetails = async (email, callback) => {
-    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+fetchUserDetails = async (id, callback) => {
+    Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return callback(results[0])
     })
@@ -157,14 +157,19 @@ addCourse = async (id, course_name) => {
 }
 
 addBio = async (user_id, message) => {
-    Connection.query(`UPDATE bio SET message = '${message}' WHERE user_id = ${user_id}`, (error, results, fields) => {
+    Connection.query("UPDATE bio SET message = ? WHERE user_id = ?", [
+        message,
+        user_id
+    ], (error, results, fields) => {
         if (error) throw error;
         return;
     })
 }
 
 getBio = async (user_id, callback) => {
-    Connection.query(`SELECT * FROM bio WHERE user_id = ${user_id}`, (error, results, fields) => {
+    Connection.query("SELECT * FROM bio WHERE user_id = ?", [
+        user_id
+    ], (error, results, fields) => {
         if (error) throw error;
         return callback(results);
     })

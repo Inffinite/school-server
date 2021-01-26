@@ -103,21 +103,23 @@ router.get('/userDetailsId', auth, async (req, res) => {
 
 router.get('/stalkUser', auth, async (req, res) => {
     try {
+        console.log(req.user.id)
+        console.log(req.query.id)
+        fetchUserDetails(req.query.id, ((results) => {
 
-        switch (req.user.email) {
-            case req.query.email:
-                return res.status(400).send({ error: 'You cannot stalk yourself' })
-                break;
+            // if victim id matches the stalker's id
+            // send back the details
+            // but dont add him to the stalkers list
 
-            default:
-                fetchUserDetails(req.query.email, ((results) => {
-                    console.log(req.user.id)
-                    stalker(req.user.id, results.id, (() => {
-                        res.status(200).send(results)
-                    }))
+            if(req.user.id == req.query.id){
+                console.log('match')
+                return res.status(200).send(results); 
+            } else {
+                stalker(req.user.id, results.id, (() => {
+                    res.status(200).send(results)
                 }))
-                break;
-        }
+            }
+        }))
 
     } catch (error) {
         console.log(error)
