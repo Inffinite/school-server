@@ -63,6 +63,24 @@ createUser = async (fname, lname, email, profile_pic_url, role, last_action, cal
     );
 }
 
+admissionConfirm = async (number, initial, id, callback) => {
+    Connection.query(`SELECT * FROM admission_numbers WHERE admission_number = ${number} AND admission_initial = '${initial}' AND user_id != ${id}`, (error, results, fields) => {
+        if (error) throw error;
+        
+        switch(results.length){
+            case 0:
+                // all good
+                return callback(true)
+                break;
+
+            default:
+                // not good
+                return callback(false)
+                break;
+        }
+    })
+}
+
 fetchUserId = async (email, callback) => {
     Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
         if (error) throw error;
@@ -352,5 +370,6 @@ module.exports = {
     addBio,
     getBio,
     getCourse,
-    logout
+    logout,
+    admissionConfirm
 }

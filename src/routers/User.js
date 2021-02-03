@@ -25,7 +25,8 @@ const {
     addBio,
     getBio,
     getCourse,
-    logout
+    logout,
+    admissionConfirm
 } = require('../models/UserModel')
 const moment = require('moment');
 
@@ -37,6 +38,7 @@ router.get('/stuff', async (req, res) => {
     // });
 
     console.log(req.query.stuff)
+    res.status(400).send()
 })
 
 router.get('/hello', async (req, res) => {
@@ -72,6 +74,12 @@ router.get('/getBio', auth, async (req, res) => {
         res.status(200).send(results)
     }))
 })
+
+// router.post('/details', auth, async (req, res) => {
+//     getBio(req.query.id, ((results) => {
+//         res.status(200).send(results)
+//     }))
+// })
 
 router.post('/editDetails', auth, async (req, res) => {
     // phone course link admission role
@@ -162,6 +170,20 @@ router.get('/getCourse', auth, async (req, res) => {
         await getCourse(req.query.id, ((course) => {
             res.status(200).send(course)
         }))  
+    } catch (error) {
+        res.status(400).send()
+    }
+})
+
+router.get('/admissionConfirm', auth, async (req, res) => {
+    try {
+        await admissionConfirm(req.query.number, req.query.initial, req.user.id, ((status) => {
+            if(status == true){
+                res.status(200).send({ status: true })
+            } else {
+                res.status(200).send({ status: false })
+            }
+        }))
     } catch (error) {
         res.status(400).send()
     }
