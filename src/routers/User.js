@@ -29,6 +29,7 @@ const {
     admissionConfirm
 } = require('../models/UserModel')
 const moment = require('moment');
+const { query } = require('../db/mysql')
 
 
 router.get('/stuff', async (req, res) => {
@@ -75,11 +76,31 @@ router.get('/getBio', auth, async (req, res) => {
     }))
 })
 
-// router.post('/details', auth, async (req, res) => {
-//     getBio(req.query.id, ((results) => {
-//         res.status(200).send(results)
-//     }))
-// })
+router.post('/addDetails', auth, async (req, res) => {
+    console.log('started')
+
+    try{
+        await addAdmission(req.user.id, req.query.admission, req.query.initial, ((status) => {
+            if(status == false){
+                res.status(200).send({ message: "The admission you entered is already in use." })
+            }
+        }))
+
+        console.log('done')
+    
+        await addCourse(req.user.id, req.query.course)
+    
+        await addContacts(req.user.id, req.query.phone)
+    
+        if(req.query.role != 'student'){
+            await editRole(req.query.role, req.user.id)
+        }    
+    
+        res.status(200).send()
+    } catch(e){
+        res.status(400).send()
+    }
+})
 
 router.post('/editDetails', auth, async (req, res) => {
     // phone course link admission role
@@ -92,8 +113,8 @@ router.post('/editDetails', auth, async (req, res) => {
             await editCourse(req.query.course, req.user.id)
         }
 
-        if (req.query.link) {
-            await editContacts(req.query.phone, req.query.link, req.user.id)
+        if (req.query.phone) {
+            await editContacts(req.query.phone, req.user.id)
         }
 
         if (req.query.role) {

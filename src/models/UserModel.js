@@ -103,15 +103,17 @@ fetchUserDetailsById = async (id, callback) => {
 }
 
 addAdmission = async (id, admission, initials, callback) => {
-    Connection.query(`SELECT * FROM admission_numbers WHERE 
-  admission_number = ${admission} AND
-  admission_initial = '${initials}' AND
-  user_id != ${id}`, (error, results, fields) => {
-        if (error) throw error;
+    // check if admission is assigned to someone else
 
-        if (results.length != 0) {
-            return callback(false)
-        }
+    Connection.query(`SELECT * FROM admission_numbers WHERE 
+        admission_number = ${admission} AND
+        admission_initial = '${initials}' AND
+        user_id != ${id}`, (error, results, fields) => {
+                if (error) throw error;
+
+                if (results.length != 0) {
+                    return callback(false)
+                }
     })
 
     Connection.query(`SELECT * FROM admission_numbers WHERE user_id = ${id}`, (error, results, fields) => {
@@ -158,25 +160,25 @@ addCourse = async (id, course_name) => {
             case 0:
                 // if users course does not exist add one
                 Connection.query(`
-        INSERT INTO course (
-          user_id, 
-          course_name) 
-          VALUES (
-            ${id},
-            '${course_name}'
-          )`, (error, results, fields) => {
-                    if (error) throw error;
-                    return;
-                })
+                    INSERT INTO course (
+                    user_id, 
+                    course_name) 
+                    VALUES (
+                        ${id},
+                        '${course_name}'
+                    )`, (error, results, fields) => {
+                                if (error) throw error;
+                                return;
+                            })
                 break;
 
             default:
                 // if users course exists, update it
                 Connection.query(`UPDATE course SET 
-        user_id = ${id}, 
-        course_name = '${course_name}' WHERE user_id = ${id}`, (error, results, fields) => {
-                    if (error) throw error;
-                    return;
+                    user_id = ${id}, 
+                    course_name = '${course_name}' WHERE user_id = ${id}`, (error, results, fields) => {
+                                if (error) throw error;
+                                return;
                 })
                 break;
         }
@@ -184,12 +186,23 @@ addCourse = async (id, course_name) => {
 }
 
 addBio = async (user_id, message) => {
-    Connection.query("UPDATE bio SET message = ? WHERE user_id = ?", [
-        message,
-        user_id
-    ], (error, results, fields) => {
+    Connection.query(`SELECT * FROM bio WHERE user_id = ${user_id}`, (error, results, fields) => {
         if (error) throw error;
-        return;
+        if(results.length > 0){
+            Connection.query("UPDATE bio SET message = ? WHERE user_id = ?", [
+                message,
+                user_id
+            ], (error, results, fields) => {
+                if (error) throw error;
+                return;
+            })
+
+        }
+    })
+
+    Connection.query(`INSERT INTO bio (user_id, message) VALUES (${user_id}, '${message}')`, (error, results, fields) => {
+        if (error) throw error;
+        return
     })
 }
 
@@ -227,7 +240,7 @@ stalkers = async (id, callback) => {
     })
 }
 
-addContacts = async (id, phone, ig_link) => {
+addContacts = async (id, phone) => {
     Connection.query(`SELECT * FROM contacts WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         console.log(results.length)
@@ -235,17 +248,15 @@ addContacts = async (id, phone, ig_link) => {
             case 0:
                 // if no contacts exist add a new one
                 Connection.query(`
-        INSERT INTO contacts (
-          user_id, 
-          phone, 
-          instagram_link) 
-          VALUES (
-            ${id},
-            '${phone}',
-            '${ig_link}'
-          )`, (error, results, fields) => {
-                    if (error) throw error;
-                    return;
+                    INSERT INTO contacts (
+                    user_id, 
+                    phone) 
+                    VALUES (
+                        ${id},
+                        '${phone}'
+                    )`, (error, results, fields) => {
+                                if (error) throw error;
+                                return;
                 })
                 break;
 
@@ -253,11 +264,10 @@ addContacts = async (id, phone, ig_link) => {
                 // if contact exists update it with the parameters
 
                 Connection.query(`UPDATE contacts SET 
-        user_id = ${id}, 
-        phone = '${phone}', 
-        instagram_link = '${ig_link}' WHERE user_id = ${id}`, (error, results, fields) => {
-                    if (error) throw error;
-                    return;
+                    user_id = ${id}, 
+                    phone = '${phone}' WHERE user_id = ${id}`, (error, results, fields) => {
+                        if (error) throw error;
+                        return;
                 })
 
                 break;
@@ -293,8 +303,8 @@ getCourse = (id, callback) => {
     })
 }
 
-editContacts = (phone, link, id) => {
-    Connection.query(`UPDATE contacts SET phone='${phone}', instagram_link='${link}' WHERE id = ${id}`, (error, results, fields) => {
+editContacts = (phone, id) => {
+    Connection.query(`UPDATE contacts SET phone='${phone}' WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
         return
     })
