@@ -133,6 +133,22 @@ router.get('/userDetailsId', auth, async (req, res) => {
     }))
 })
 
+router.post('/addStalker', auth, async (req, res) => {
+    try {
+        if(req.query.victimId == req.user.id){
+            return res.status(200).send()
+        }
+
+        var url = req.user.fname + ' ' + req.user.lname
+
+        await stalker(req.user.id, req.query.victimId, req.user.fname, url)
+        res.status(200).send()
+    } catch(e){
+        console.log(e)
+        res.status(400).send()
+    }
+})
+
 router.get('/stalkUser', auth, async (req, res) => {
     try {
         fetchUserDetails(req.query.id, ((results) => {

@@ -15,15 +15,15 @@ generateAuthToken = async (userid, callback) => {
     })
 }
 
-stalker = async (userid, victimid, name, callback) => {
+stalker = async (userid, victimid, name, url) => {
     var time = moment().format();
 
-    Connection.query(`INSERT INTO stalkers (user_id, stalker_id, name, time) VALUES (${victimid}, ${userid}, '${name}', '${time}')`, (error, results, fields) => {
+    Connection.query(`INSERT INTO stalkers (user_id, stalker_id, pic_url, name, time) VALUES (${victimid}, ${userid}, '${url}', '${name}', '${time}')`, (error, results, fields) => {
         if (error) throw error;
 
         Connection.query(`UPDATE users SET stalkers_count = stalkers_count + 1 WHERE id = ${victimid}`, (error, results, fields) => {
             if (error) throw error;
-            return callback();
+            return;
         })
 
     })
