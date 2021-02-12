@@ -15,20 +15,6 @@ generateAuthToken = async (userid, callback) => {
     })
 }
 
-stalker = async (userid, victimid, name, url) => {
-    var time = moment().format();
-
-    Connection.query(`INSERT INTO stalkers (user_id, stalker_id, pic_url, name, time) VALUES (${victimid}, ${userid}, '${url}', '${name}', '${time}')`, (error, results, fields) => {
-        if (error) throw error;
-
-        Connection.query(`UPDATE users SET stalkers_count = stalkers_count + 1 WHERE id = ${victimid}`, (error, results, fields) => {
-            if (error) throw error;
-            return;
-        })
-
-    })
-}
-
 logout = async (id) => {
     Connection.query(`DELETE FROM tokens WHERE user_id = ${id}`, (error, results, fields) => {
         if (error) throw error;
@@ -362,7 +348,6 @@ module.exports = {
     generateAuthToken,
     fetchUserDetails,
     fetchUserId,
-    stalker,
     confirmToken,
     addContacts,
     addCourse,

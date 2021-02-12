@@ -12,12 +12,14 @@ const MessagesRouter = require('./routers/Messages')
 const EventsRouter = require('./routers/Events')
 const WhatsappRouter = require('./routers/Whatsapp')
 const FaqRouter = require('./routers/Faq')
+const StalkerRouter = require('./routers/Stalkers')
 
 app.use(UserRouter)
 app.use(MessagesRouter)
 app.use(EventsRouter)
 app.use(WhatsappRouter)
 app.use(FaqRouter)
+app.use(StalkerRouter)
 
 // enables accessing profile pictures
 app.use('/profiles', express.static(__dirname + '/dp'))

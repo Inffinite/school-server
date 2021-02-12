@@ -42,19 +42,6 @@ router.get('/stuff', async (req, res) => {
     res.status(400).send()
 })
 
-router.get('/hello', async (req, res) => {
-    // var email = 'louislaizr4@gmail.com'
-    // Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
-    //   if (error) throw error;
-    //   console.log(results.length)
-    // })
-    // generateAuthToken(3, ((token) => {
-    //   console.log(token)
-    // }))
-
-    res.status(200).send({ message: "f" })
-})
-
 router.get('/userDetails', auth, async (req, res) => {
     fetchUserDetails(req.query.id, ((results) => {
         res.status(200).send(results)
@@ -131,50 +118,6 @@ router.get('/userDetailsId', auth, async (req, res) => {
     fetchUserDetailsById(req.user.id, ((results) => {
         res.status(200).send(results)
     }))
-})
-
-router.post('/addStalker', auth, async (req, res) => {
-    try {
-        if(req.query.victimId == req.user.id){
-            return res.status(200).send()
-        }
-
-        var url = req.user.fname + ' ' + req.user.lname
-
-        await stalker(req.user.id, req.query.victimId, req.user.fname, url)
-        res.status(200).send()
-    } catch(e){
-        console.log(e)
-        res.status(400).send()
-    }
-})
-
-router.get('/stalkUser', auth, async (req, res) => {
-    try {
-        fetchUserDetails(req.query.id, ((results) => {
-
-            // if victim id matches the stalker's id
-            // send back the details
-            // but dont add him to the stalkers list
-
-            var name = req.user.fname + ' ' + req.user.lname
-
-            if(req.user.id == req.query.id){
-                stalker(req.user.id, results.id, name, (() => {
-                    res.status(200).send(results)
-                }))
-                // return res.status(200).send(results); 
-            } else {
-                stalker(req.user.id, results.id, (() => {
-                    res.status(200).send(results)
-                }))
-            }
-        }))
-
-    } catch (error) {
-        console.log(error)
-        res.status(400).send()
-    }
 })
 
 router.post('/addContacts', auth, async (req, res) => {
@@ -278,15 +221,7 @@ router.get('/logout', auth, async (req, res) => {
     }
 })
 
-router.get('/stalkers', auth, async (req, res) => {
-    try {
-        stalkers(req.user.id, ((results) => {
-            res.status(200).send(results)
-        }))
-    } catch (error) {
-        req.status(400).send()
-    }
-})
+
 
 router.post('/signin', async (req, res) => {
     confirmToken(req.query.token, ((status) => {
