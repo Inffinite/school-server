@@ -3,6 +3,7 @@ const router = new express.Router()
 const {
     fetchUserDetails
 } = require('../models/UserModel')
+const auth = require('../middleware/auth')
 
 const { stalker } = require('../models/StalkersModel')
 
