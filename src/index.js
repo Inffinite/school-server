@@ -13,6 +13,7 @@ const EventsRouter = require('./routers/Events')
 const WhatsappRouter = require('./routers/Whatsapp')
 const FaqRouter = require('./routers/Faq')
 const StalkerRouter = require('./routers/Stalkers')
+const CreditsRouter = require('./routers/Credit')
 
 app.use(UserRouter)
 app.use(MessagesRouter)
@@ -20,6 +21,7 @@ app.use(EventsRouter)
 app.use(WhatsappRouter)
 app.use(FaqRouter)
 app.use(StalkerRouter)
+app.use(CreditsRouter)
 
 // enables accessing profile pictures
 app.use('/profiles', express.static(__dirname + '/dp'))
