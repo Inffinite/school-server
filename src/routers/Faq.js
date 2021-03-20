@@ -23,7 +23,7 @@ router.get('/getFaq', auth, async(req, res) => {
     }
 })
 
-router.delete('/deleteFaq', auth, async(req, res) => {
+router.post('/deleteFaq', auth, async(req, res) => {
     try {
         if (req.query.id == null) {
             return res.status(400).send();
