@@ -12,9 +12,9 @@ router.post('/newEvent', auth, async(req, res) => {
     }
 })
 
-router.get('getEvents', auth, async(req, res) => {
+router.get('/getEvents', auth, async(req, res) => {
     try {
-        getEvents((result) => {
+        await getEvents((result) => {
             res.status(200).send(result)
         })
     } catch {
