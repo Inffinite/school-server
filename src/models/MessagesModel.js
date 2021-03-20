@@ -92,10 +92,18 @@ deleteUserMessage = async (id) => {
     })
 }
 
+latestMessages = async (callback) => {
+    Connection.query(`SELECT *, CONCAT(LEFT(message, 50), '...') as redacted FROM messages LIMIT 5`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results);
+    })
+}
+
 module.exports = {
     getMessages,
     deleteMessage,
     deleteUserMessage,
     addMessage,
-    checkMessages
+    checkMessages,
+    latestMessages
 }

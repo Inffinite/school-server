@@ -8,7 +8,8 @@ const {
     getMessages,
     deleteMessage,
     deleteUserMessage,
-    checkMessages
+    checkMessages,
+    latestMessages
 } = require('../models/MessagesModel')
 
 router.post('/suggest', auth, async(req, res) => {
@@ -25,6 +26,17 @@ router.post('/suggest', auth, async(req, res) => {
 router.get('/checkMessages', auth, async(req, res) => {
     try {
         await checkMessages((messages) => {
+            res.status(200).send(messages)
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(400).send()
+    }
+})
+
+router.get('/latestMessages', auth, async(req, res) => {
+    try {
+        await latestMessages((messages) => {
             res.status(200).send(messages)
         })
     } catch (error) {
