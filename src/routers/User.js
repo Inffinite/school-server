@@ -9,6 +9,7 @@ const {
     confirmToken,
     generateAuthToken,
     fetchUserDetails,
+    fetchUserStuff,
     stalker,
     addContacts,
     addCourse,
@@ -30,7 +31,50 @@ const {
 } = require('../models/UserModel')
 const moment = require('moment');
 const { query } = require('../db/mysql')
+const multer = require('multer')
 
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+
+        // Uploads is the Upload_folder_name 
+        cb(null, "uploads")
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + "-" + Date.now() + ".jpg")
+    }
+})
+
+var upload = multer({
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+
+        // Set the filetypes, it is optional 
+        var filetypes = /jpeg|jpg|png|pdf|docx|zip/;
+        var mimetype = filetypes.test(file.mimetype);
+
+        var extname = filetypes.test(path.extname(
+            file.originalname).toLowerCase());
+
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+
+        cb("Error: File upload only supports the "
+            + "following filetypes - " + filetypes);
+    }
+
+    // mypic is the name of file attribute 
+}).single("mypic");
+
+router.post("/upload", async (req, res) => {
+    upload(req, res, ((err) => {
+        if(err){
+            res.status(400).send(err)
+        } else {
+            res.status(200).send({ message: 'Success' })
+        }
+    }))
+})
 
 router.get('/stuff', async (req, res) => {
     // download('https://www.google.com/images/srpr/logo3w.png', 'google.png', function () {
@@ -46,6 +90,19 @@ router.get('/userDetails', auth, async (req, res) => {
     fetchUserDetails(req.query.id, ((results) => {
         res.status(200).send(results)
     }))
+})
+
+router.get('/userStuff', auth, async (req, res) => {
+    // sends back specific parameters of a specific user
+    // param marks specific item to be fetched
+
+    try{
+        fetchUserStuff(req.query.param, req.query.id, ((results) => {
+            res.status(200).send(results)
+        })) 
+    } catch(e){
+        res.status(400).send()
+    }
 })
 
 router.get('/me', auth, async (req, res) => {
@@ -66,25 +123,25 @@ router.get('/getBio', auth, async (req, res) => {
 router.post('/addDetails', auth, async (req, res) => {
     console.log('started')
 
-    try{
+    try {
         await addAdmission(req.user.id, req.query.admission, req.query.initial, ((status) => {
-            if(status == false){
+            if (status == false) {
                 res.status(200).send({ message: "The admission you entered is already in use." })
             }
         }))
 
         console.log('done')
-    
+
         await addCourse(req.user.id, req.query.course)
-    
+
         await addContacts(req.user.id, req.query.phone)
-    
-        if(req.query.role != 'student'){
+
+        if (req.query.role != 'student') {
             await editRole(req.query.role, req.user.id)
-        }    
-    
+        }
+
         res.status(200).send()
-    } catch(e){
+    } catch (e) {
         res.status(400).send()
     }
 })
@@ -149,7 +206,7 @@ router.get('/getCourse', auth, async (req, res) => {
     try {
         await getCourse(req.query.id, ((course) => {
             res.status(200).send(course)
-        }))  
+        }))
     } catch (error) {
         res.status(400).send()
     }
@@ -158,7 +215,7 @@ router.get('/getCourse', auth, async (req, res) => {
 router.get('/admissionConfirm', auth, async (req, res) => {
     try {
         await admissionConfirm(req.query.number, req.query.initial, req.user.id, ((status) => {
-            if(status == true){
+            if (status == true) {
                 res.status(200).send({ status: true })
             } else {
                 res.status(200).send({ status: false })

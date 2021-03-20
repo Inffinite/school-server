@@ -74,6 +74,58 @@ fetchUserId = async (email, callback) => {
     })
 }
 
+fetchUserStuff = async (param, id, callback) => {
+    switch(param){
+        case 'fname':
+            Connection.query(`SELECT fname FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            })
+            break;
+
+        case 'lname':
+            Connection.query(`SELECT lname FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            })
+            break;
+
+        case 'role':
+            Connection.query(`SELECT role FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            })
+
+            break;
+
+        case 'email':
+            Connection.query(`SELECT email FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            });
+            break;
+
+        case 'last_action':
+            Connection.query(`SELECT last_action FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            });
+            break;
+
+        case 'stalkers_count':
+            Connection.query(`SELECT stalkers_count FROM users WHERE id = ${id}`, (error, results, fields) => {
+                if (error) throw error;
+                return callback(results)
+            });
+            break;
+    }
+
+    Connection.query(`SELECT * FROM users WHERE email = '${email}'`, (error, results, fields) => {
+        if (error) throw error;
+        return callback(results[0].id)
+    })
+}
+
 fetchUserDetails = async (id, callback) => {
     Connection.query(`SELECT * FROM users WHERE id = ${id}`, (error, results, fields) => {
         if (error) throw error;
@@ -363,6 +415,7 @@ module.exports = {
     editCourse,
     editContacts,
     addBio,
+    fetchUserStuff,
     getBio,
     getCourse,
     logout,
